@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7d769910d94453bd3651e37de6f420, type: 3}
+  m_Name: AdvancedUIMenuItemSetting
+  m_EditorClassIdentifier: 
+  BaseRootCanvas: {fileID: 347262492573265198, guid: d0ff3d783a86267468de66edb768cc3f, type: 3}
+  BaseLabelPrefab: {fileID: 8940293140680666233, guid: b6bbcb353c6ffd441a39c8f1b069498d, type: 3}
+  BaseImagePrefab: {fileID: 7112381636683283819, guid: 10398c01df787a04abfcdd61e3bd472c, type: 3}
+  BaseButtonPrefab: {fileID: 2429950895597441407, guid: 57bc23ad36869b648a2b1161d435aa4a, type: 3}
+  BaseLabeledButtonPrefab: {fileID: 6221169460303260072, guid: 41fe3df8a27fbae4d892ff48cd5b1af2, type: 3}

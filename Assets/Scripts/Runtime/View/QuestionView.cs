@@ -1,20 +1,24 @@
-﻿using Quiz.Runtime.Model;
+﻿using QuizGame.Runtime.Model;
 using TMPro;
 using UnityEngine;
 
-namespace Quiz.Runtime.View
+namespace QuizGame.Runtime.View
 {
     public class QuestionView : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI questionLabel;
-        [SerializeField] private TextMeshProUGUI answarALabel;
-        [SerializeField] private TextMeshProUGUI answarBLabel;
-        [SerializeField] private TextMeshProUGUI answarCLabel;
-        [SerializeField] private TextMeshProUGUI answarDLabel;
+        [SerializeField] private TextMeshProUGUI choiceALabel;
+        [SerializeField] private TextMeshProUGUI choiceBLabel;
+        [SerializeField] private TextMeshProUGUI choiceCLabel;
+        [SerializeField] private TextMeshProUGUI choiceDLabel;
 
-        public void UpdateQuestion(Question question)
+        public void SetQuestion(MultipleChoiceQuestion multipleChoiceQuestion)
         {
-            
+            questionLabel.text = multipleChoiceQuestion.Question;
+            choiceALabel.text = multipleChoiceQuestion.ChoiceA;
+            choiceBLabel.text = multipleChoiceQuestion.ChoiceB;
+            choiceCLabel.text = multipleChoiceQuestion.ChoiceC;
+            choiceDLabel.text = multipleChoiceQuestion.ChoiceD;
         }
     }
 }

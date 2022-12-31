@@ -1,9 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace Quiz
+namespace QuizGame.Runtime.StateMachine
 {
     public class StateMachine : MonoBehaviour
     {

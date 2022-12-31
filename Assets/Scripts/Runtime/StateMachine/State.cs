@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Quiz
+namespace QuizGame.Runtime.StateMachine
 {
     public abstract class State : MonoBehaviour
     {

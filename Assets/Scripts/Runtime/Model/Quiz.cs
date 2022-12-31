@@ -1,11 +1,19 @@
 ﻿using System;
+using UnityEngine;
 
-namespace Quiz.Runtime.Model
+namespace QuizGame.Runtime.Model
 {
     [Serializable]
     public class Quiz
     {
-        public Question[] questions;
+        [SerializeField] private MultipleChoiceQuestion[] questions;
+
+        public MultipleChoiceQuestion[] Questions => questions;
+
+        public Quiz(MultipleChoiceQuestion[] questions)
+        {
+            this.questions = questions;
+        }
 
         public void Log()
         {

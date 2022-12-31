@@ -1,6 +1,6 @@
-﻿namespace Quiz.States
+﻿namespace QuizGame.Runtime.StateMachine.States
 {
-    public class QuizState : State
+    public class PreQuizState : State
     {
         public override void EnterState()
         {
