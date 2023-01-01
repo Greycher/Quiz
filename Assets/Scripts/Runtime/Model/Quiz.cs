@@ -6,11 +6,11 @@ namespace QuizGame.Runtime.Model
     [Serializable]
     public class Quiz
     {
-        [SerializeField] private MultipleChoiceQuestion[] questions;
+        [SerializeField] private Question[] questions;
 
-        public MultipleChoiceQuestion[] Questions => questions;
+        public Question[] Questions => questions;
 
-        public Quiz(MultipleChoiceQuestion[] questions)
+        public Quiz(Question[] questions)
         {
             this.questions = questions;
         }
