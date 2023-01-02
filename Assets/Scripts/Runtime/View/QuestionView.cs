@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using DG.Tweening;
-using DG.Tweening.Core;
 using EasyClap.Seneca.Attributes;
 using QuizGame.Runtime.Model;
 using TMPro;
@@ -33,6 +32,21 @@ namespace QuizGame.Runtime.View
         private bool _entered;
         private float _screenBlendValue;
 
+        private bool Entered
+        {
+            get => _entered;
+            set
+            {
+                if (value == _entered)
+                {
+                    return;
+                }
+
+                _entered = value;
+                SetButtonsInteractable(_entered);
+            }
+        }
+
         private void Awake()
         {
             _screenBlendValue = (outerLeftBlendValue + outerRightBlendValue) / 2;
@@ -53,13 +67,17 @@ namespace QuizGame.Runtime.View
             choiceCButton.onClick.RemoveAllListeners();
             choiceDButton.onClick.RemoveAllListeners();
         }
+        
+        private void SetButtonsInteractable(bool entered)
+        {
+            choiceAButton.interactable = entered;
+            choiceBButton.interactable = entered;
+            choiceCButton.interactable = entered;
+            choiceDButton.interactable = entered;
+        }
 
         private void OnAnswerSelected(Answer answer)
         {
-            choiceAButton.interactable = false;
-            choiceBButton.interactable = false;
-            choiceCButton.interactable = false;
-            choiceDButton.interactable = false;
             OnAswerSelect?.Invoke(answer);
         }
 
@@ -79,35 +97,35 @@ namespace QuizGame.Runtime.View
 
         public IEnumerator OuterLeftToScreenRoutine()
         {
-            if (_entered)
+            if (Entered)
             {
                 yield break;
             }
             
-            _entered = true;
             yield return DOTween.To(ScreenBlendSetter, outerLeftBlendValue, _screenBlendValue, 0.5f);
+            Entered = true;
         }
         
         public IEnumerator ScreenToOuterRightRoutine()
         {
-            if (!_entered)
+            if (!Entered)
             {
                 yield break;
             }
             
-            _entered = false;
+            Entered = false;
             yield return DOTween.To(ScreenBlendSetter, _screenBlendValue, outerRightBlendValue, 0.5f);
         }
 
         public void SetToOuterLeft()
         {
-            _entered = false;
+            Entered = false;
             ScreenBlendSetter(outerLeftBlendValue);
         }
         
         public void SetToOuterRight()
         {
-            _entered = false;
+            Entered = false;
             ScreenBlendSetter(outerRightBlendValue);
         }
     }

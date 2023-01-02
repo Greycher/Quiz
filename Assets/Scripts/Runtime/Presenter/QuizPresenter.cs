@@ -12,6 +12,7 @@ namespace QuizGame.Runtime.Presenter
     public class QuizPresenter : MonoBehaviour
     {
         [SerializeField] private QuizView quizView;
+        [SerializeField] private TimerView timerView;
         
         private Quiz _quiz;
         private int _currentQuestionIndex;
@@ -23,16 +24,6 @@ namespace QuizGame.Runtime.Presenter
             StartCoroutine(FetchQuizRoutine());
         }
 
-        private void OnEnable()
-        {
-            quizView.OnAsnwerSelect += OnAsnwerSelected;
-        }
-        
-        private void OnDisable()
-        {
-            quizView.OnAsnwerSelect -= OnAsnwerSelected;
-        }
-        
         IEnumerator FetchQuizRoutine()
         {
             UnityWebRequest request = UnityWebRequest.Get("https://magegamessite.web.app/case1/questions.json");
@@ -50,32 +41,60 @@ namespace QuizGame.Runtime.Presenter
             }
             catch (JsonReaderException  e)
             {
-                Debug.Log($"Invalid character at position {e.LineNumber}, {e.LinePosition}");
-                throw;
+                throw new Exception($"Invalid character at position {e.LineNumber}, {e.LinePosition}");
+            }
+        }
+        
+        private void AskQuestion()
+        {
+            StartCoroutine(AskQuestionRoutine(CurrentQuestion));
+        }
+
+        private IEnumerator AskQuestionRoutine(Question question)
+        {
+            yield return quizView.SetNextQuestionRoutine(question);
+            timerView.StartTimer(20, OnTimerCompleted);
+        }
+        
+        private void OnAnswerSelected(Answer answer)
+        {
+            timerView.StopTimer();
+            if (answer == CurrentQuestion.Answer)
+            {
+                if (++_currentQuestionIndex < _quiz.Questions.Length)
+                {
+                    AskQuestion();
+                }
+                else
+                {
+                    EndQuiz(true);
+                }
+            }
+            else
+            {
+                EndQuiz(false);
             }
         }
 
-        private void OnAsnwerSelected(Answer answer)
+        private void OnTimerCompleted()
         {
-            Debug.Log($"The given answer is {(answer == CurrentQuestion.Answer).ToString()}");
+            EndQuiz(false);
         }
         
+        //TODO Make sure quiz model creation was successfull
         [Button]
-        private void SetNextQuestion()
+        public void StartQuiz()
         {
-            StartCoroutine(quizView.SetNextQuestionRoutine(CurrentQuestion));
-            _currentQuestionIndex++;
+            _currentQuestionIndex = 0;
+            quizView.OnAnswerSelect += OnAnswerSelected;
+
+            AskQuestion();
         }
-        
-        // public void StartQuiz()
-        // {
-        //     StartCoroutine(StartQuiRoutine());
-        // }
-        //
-        // private IEnumerator StartQuiRoutine()
-        // {
-        //     _currentQuestion = _quiz.Questions[0];
-        //     yield return quizView.SetNextQuestionRoutine(_currentQuestion);
-        // }
+
+        private void EndQuiz(bool success)
+        {
+            quizView.OnAnswerSelect -= OnAnswerSelected;
+            Debug.Log($"The given answer is {success.ToString()}");
+        }
     }
 }
