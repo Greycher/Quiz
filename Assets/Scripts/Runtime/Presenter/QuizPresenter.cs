@@ -22,8 +22,10 @@ namespace QuizGame.Runtime.Presenter
         private void Awake()
         {
             StartCoroutine(FetchQuizRoutine());
+            timerView.gameObject.SetActive(false);
         }
 
+        //TODO background task manager
         IEnumerator FetchQuizRoutine()
         {
             UnityWebRequest request = UnityWebRequest.Get("https://magegamessite.web.app/case1/questions.json");
@@ -45,56 +47,70 @@ namespace QuizGame.Runtime.Presenter
             }
         }
         
+        //TODO Make sure quiz model creation was successfull
+        [Button]
+        public void StartQuiz()
+        {
+            _currentQuestionIndex = 0;
+            AskQuestion();
+        }
+        
         private void AskQuestion()
         {
             StartCoroutine(AskQuestionRoutine(CurrentQuestion));
         }
-
+        
         private IEnumerator AskQuestionRoutine(Question question)
         {
             yield return quizView.SetNextQuestionRoutine(question);
+            quizView.OnAnswerSelect += OnAnswerSelected;
+            timerView.gameObject.SetActive(true);
+            //TODO take seconds from a setting
             timerView.StartTimer(20, OnTimerCompleted);
         }
         
         private void OnAnswerSelected(Answer answer)
         {
             timerView.StopTimer();
+            quizView.OnAnswerSelect -= OnAnswerSelected;
             if (answer == CurrentQuestion.Answer)
             {
-                if (++_currentQuestionIndex < _quiz.Questions.Length)
-                {
-                    AskQuestion();
-                }
-                else
-                {
-                    EndQuiz(true);
-                }
+                StartCoroutine(OnCorrectAnswer(answer));
             }
             else
             {
-                EndQuiz(false);
+                StartCoroutine(OnWrongAnswer(answer));
             }
+        }
+
+        private IEnumerator OnCorrectAnswer(Answer answer)
+        {
+            yield return quizView.AnimateCorrectAnswer(answer);
+            if (++_currentQuestionIndex < _quiz.Questions.Length)
+            {
+                AskQuestion();
+            }
+            else
+            {
+                EndQuiz(true);
+            }
+        }
+        
+        private IEnumerator OnWrongAnswer(Answer answer)
+        {
+            yield return quizView.AnimateWrongAnswer(answer);
+            EndQuiz(false);
         }
 
         private void OnTimerCompleted()
         {
+            quizView.OnAnswerSelect -= OnAnswerSelected;
             EndQuiz(false);
-        }
-        
-        //TODO Make sure quiz model creation was successfull
-        [Button]
-        public void StartQuiz()
-        {
-            _currentQuestionIndex = 0;
-            quizView.OnAnswerSelect += OnAnswerSelected;
-
-            AskQuestion();
         }
 
         private void EndQuiz(bool success)
         {
-            quizView.OnAnswerSelect -= OnAnswerSelected;
-            Debug.Log($"The given answer is {success.ToString()}");
+            Debug.Log($"Quiz resulted in {(success ? "success" : "fail")}");
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EasyClap.Seneca.Attributes
+namespace QuizGame.Runtime
 {
     public class AnimatorParameterAttribute : PropertyAttribute 
     {

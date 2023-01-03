@@ -6,8 +6,9 @@ using UnityEngine;
 
 namespace QuizGame.Editor.Editor
 {
-    [CustomPropertyDrawer(typeof(AnimatorParameterAttribute))]
-    public class AnimatorParameterDrawer : PropertyDrawer
+    //TODO remove repeating code
+    [CustomPropertyDrawer(typeof(AnimatorStateAttribute))]
+    public class AnimatorStateDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) 
         {
@@ -21,7 +22,7 @@ namespace QuizGame.Editor.Editor
         {
             if (property.propertyType != SerializedPropertyType.Integer) 
             {
-                errorMessage = $"{nameof(AnimatorParameterDrawer)} works only with integer properties!";
+                errorMessage = $"{nameof(AnimatorStateDrawer)} works only with integer properties!";
                 return false;
             }
             
@@ -33,36 +34,29 @@ namespace QuizGame.Editor.Editor
                 return false;
             }
 
-            var animatorController = animator.runtimeAnimatorController as AnimatorController;
+            var animatorController = FetchRuntimeAnimatorController(animator);
             if (!animatorController) 
             {
                 errorMessage = $"{nameof(Animator)}'s {nameof(AnimatorController)} field is empty!.";
                 return false;
             }
             
-            var attr = attribute as AnimatorParameterAttribute;
-            var parameterNames = new List<string>(new []{"None"});
-            var parameters = animatorController.parameters;
-            for (int i = 0; i < parameters.Length; i++) 
+            var attr = attribute as AnimatorStateAttribute;
+            var stateNames = new List<string>(new []{"None"});
+            var childStates = animatorController.layers[attr.Layer].stateMachine.states;
+            for (int i = 0; i < childStates.Length; i++) 
             {
-                var parameter = parameters[i];
-                if (parameter.type == attr.ParameterType) 
-                {
-                    parameterNames.Add(parameter.name);
-                }
+                stateNames.Add(childStates[i].state.name);
             }
 
-            var selectedIndex = FindSelectedIndex(parameterNames, property.intValue);
+            var selectedIndex = FindSelectedIndex(stateNames, property.intValue);
             if (selectedIndex == -1) 
             {
                 selectedIndex = 0; //"None"
             }
             
-            selectedIndex = EditorGUI.Popup(position, label.text, selectedIndex, parameterNames.ToArray());
-            if (selectedIndex != 0) 
-            {
-                property.intValue = Animator.StringToHash(parameterNames[selectedIndex]);
-            }
+            selectedIndex = EditorGUI.Popup(position, label.text, selectedIndex, stateNames.ToArray());
+            property.intValue = Animator.StringToHash(stateNames[selectedIndex]);
             
             errorMessage = "";
             return true;
@@ -70,22 +64,37 @@ namespace QuizGame.Editor.Editor
 
         private Animator FetchAnimator(SerializedProperty property) 
         {
-            var attr = attribute as AnimatorParameterAttribute;
+            var attr = attribute as AnimatorStateAttribute;
             var animatorProperty = property.serializedObject.FindProperty(attr.AnimatorPropertyName);
             return animatorProperty.objectReferenceValue as Animator;
         }
-        
-        private int FindSelectedIndex(List<string> parameterNames, int hashValue) 
+
+        private AnimatorController FetchRuntimeAnimatorController(Animator animator)
         {
-            for (int i = 0; i < parameterNames.Count; i++) 
+            if (animator.runtimeAnimatorController is AnimatorController animatorController)
             {
-                if (Animator.StringToHash(parameterNames[i]) == hashValue) 
+                return animatorController;
+            }
+
+            if (animator.runtimeAnimatorController is AnimatorOverrideController animatorOverrideController)
+            {
+                return animatorOverrideController.runtimeAnimatorController as AnimatorController;
+            }
+
+            return null;
+        }
+        
+        private int FindSelectedIndex(List<string> stateNames, int hashValue) 
+        {
+            for (int i = 0; i < stateNames.Count; i++) 
+            {
+                if (Animator.StringToHash(stateNames[i]) == hashValue) 
                 {
                     return i;
                 }
             }
 
-            return 0;
+            return -1;
         }
     }
 }

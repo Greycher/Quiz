@@ -26,6 +26,7 @@ namespace QuizGame.Runtime.View
 
         private IEnumerator CountDownRoutine(int seconds, Action onComplete)
         {
+            SetLabel(seconds);
             while (true)
             {
                 yield return new WaitForSeconds(1f);

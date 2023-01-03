@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections;
 using DG.Tweening;
-using EasyClap.Seneca.Attributes;
 using QuizGame.Runtime.Model;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace QuizGame.Runtime.View
 {
     public class QuestionView : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI questionLabel;
-        [SerializeField] private Button choiceAButton;
-        [SerializeField] private TextMeshProUGUI choiceALabel;
-        [SerializeField] private Button choiceBButton;
-        [SerializeField] private TextMeshProUGUI choiceBLabel;
-        [SerializeField] private Button choiceCButton;
-        [SerializeField] private TextMeshProUGUI choiceCLabel;
-        [SerializeField] private Button choiceDButton;
-        [SerializeField] private TextMeshProUGUI choiceDLabel;
-        
+        [SerializeField] private ChoiceView choiceAView;
+        [SerializeField] private ChoiceView choiceBView;
+        [SerializeField] private ChoiceView choiceCView;
+        [SerializeField] private ChoiceView choiceDView;
+
         [Header("Animator")]
         [SerializeField] private Animator animator;
         [SerializeField, AnimatorParameter(AnimatorControllerParameterType.Float, nameof(animator))] 
@@ -29,24 +23,9 @@ namespace QuizGame.Runtime.View
         [SerializeField] private float outerRightBlendValue = 1f;
 
         public Action<Answer> OnAswerSelect;
-        private bool _entered;
         private float _screenBlendValue;
-
-        private bool Entered
-        {
-            get => _entered;
-            set
-            {
-                if (value == _entered)
-                {
-                    return;
-                }
-
-                _entered = value;
-                SetButtonsInteractable(_entered);
-            }
-        }
-
+        private bool _onScreen;
+        
         private void Awake()
         {
             _screenBlendValue = (outerLeftBlendValue + outerRightBlendValue) / 2;
@@ -54,26 +33,26 @@ namespace QuizGame.Runtime.View
 
         private void OnEnable()
         {
-            choiceAButton.onClick.AddListener(() => OnAnswerSelected(Answer.A));
-            choiceBButton.onClick.AddListener(() => OnAnswerSelected(Answer.B));
-            choiceCButton.onClick.AddListener(() => OnAnswerSelected(Answer.C));
-            choiceDButton.onClick.AddListener(() => OnAnswerSelected(Answer.D));
+            choiceAView.OnClick += () => OnAnswerSelected(Answer.A);
+            choiceBView.OnClick += () => OnAnswerSelected(Answer.B);
+            choiceCView.OnClick += () => OnAnswerSelected(Answer.C);
+            choiceDView.OnClick += () => OnAnswerSelected(Answer.D);
         }
         
         private void OnDisable()
         {
-            choiceAButton.onClick.RemoveAllListeners();
-            choiceBButton.onClick.RemoveAllListeners();
-            choiceCButton.onClick.RemoveAllListeners();
-            choiceDButton.onClick.RemoveAllListeners();
+            choiceAView.OnClick = null;
+            choiceBView.OnClick = null;
+            choiceCView.OnClick = null;
+            choiceDView.OnClick = null;
         }
         
-        private void SetButtonsInteractable(bool entered)
+        private void SetButtonsInteractable(bool interactable)
         {
-            choiceAButton.interactable = entered;
-            choiceBButton.interactable = entered;
-            choiceCButton.interactable = entered;
-            choiceDButton.interactable = entered;
+            choiceAView.Interactable = interactable;
+            choiceBView.Interactable = interactable;
+            choiceCView.Interactable = interactable;
+            choiceDView.Interactable = interactable;
         }
 
         private void OnAnswerSelected(Answer answer)
@@ -89,44 +68,75 @@ namespace QuizGame.Runtime.View
         public void SetQuestionRoutine(Question question)
         {
             questionLabel.text = question.QuestionText;
-            choiceALabel.text = question.ChoiceA;
-            choiceBLabel.text = question.ChoiceB;
-            choiceCLabel.text = question.ChoiceC;
-            choiceDLabel.text = question.ChoiceD;
+            choiceAView.SetChoiceText(question.ChoiceA);
+            choiceBView.SetChoiceText(question.ChoiceB);
+            choiceCView.SetChoiceText(question.ChoiceC);
+            choiceDView.SetChoiceText(question.ChoiceD);
+            
+            choiceAView.ResetAnimation();
+            choiceBView.ResetAnimation();
+            choiceCView.ResetAnimation();
+            choiceDView.ResetAnimation();
         }
 
-        public IEnumerator OuterLeftToScreenRoutine()
+        public IEnumerator EnterScreen()
         {
-            if (Entered)
+            if (_onScreen)
             {
                 yield break;
             }
             
-            yield return DOTween.To(ScreenBlendSetter, outerLeftBlendValue, _screenBlendValue, 0.5f);
-            Entered = true;
+            DOTween.To(ScreenBlendSetter, outerLeftBlendValue, _screenBlendValue, 0.5f);
+            yield return new WaitForSeconds(0.5f);
+            _onScreen = true;
+            SetButtonsInteractable(true);
         }
         
-        public IEnumerator ScreenToOuterRightRoutine()
+        public IEnumerator LeaveScreen()
         {
-            if (!Entered)
+            if (!_onScreen)
             {
                 yield break;
             }
             
-            Entered = false;
-            yield return DOTween.To(ScreenBlendSetter, _screenBlendValue, outerRightBlendValue, 0.5f);
-        }
-
-        public void SetToOuterLeft()
-        {
-            Entered = false;
-            ScreenBlendSetter(outerLeftBlendValue);
+            SetButtonsInteractable(false);
+            DOTween.To(ScreenBlendSetter, _screenBlendValue, outerRightBlendValue, 0.5f);
+            yield return new WaitForSeconds(0.5f);
+            _onScreen = false;
         }
         
-        public void SetToOuterRight()
+        public void LeaveScreenImmediate()
         {
-            Entered = false;
+            _onScreen = false;
+            SetButtonsInteractable(false);
             ScreenBlendSetter(outerRightBlendValue);
+        }
+
+        private ChoiceView GetToChoiceView(Answer answer)
+        {
+            switch (answer)
+            {
+                case Answer.A:
+                    return choiceAView;
+                case Answer.B:
+                    return choiceBView;
+                case Answer.C:
+                    return choiceCView;
+                case Answer.D:
+                    return choiceDView;
+            }
+
+            return null;
+        }
+
+        public IEnumerator AnimateCorrectAnswer(Answer answer)
+        {
+            yield return GetToChoiceView(answer).AnimateCorrectAnswer();
+        }
+
+        public IEnumerator AnimateWrongAnswer(Answer answer)
+        {
+            yield return GetToChoiceView(answer).AnimateWrongAnswer();
         }
     }
 }
