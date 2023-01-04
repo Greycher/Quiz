@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c272c2cc443683f4f864264b9528f3af, type: 3}
-  m_Name: SettingRegistry
+  m_Script: {fileID: 11500000, guid: 22d678e4577449d888dab30dad07d524, type: 3}
+  m_Name: QuizSetting
   m_EditorClassIdentifier: 
-  Settings:
-  - {fileID: 11400000, guid: c6a5b5aaba17a234b9fe7c99518fe6a0, type: 2}
-  - {fileID: 11400000, guid: 95803bbffd60aa5469c596dae9eb7dda, type: 2}
+  correctAnswerScore: 5
+  wrongAnswerScore: -5
+  timeOutScore: -3

@@ -47,16 +47,5 @@ namespace QuizGame.Runtime.Model
                     throw new Exception("Given unexpected answer string!");
             }
         }
-
-        public void Log()
-        {
-            Debug.Log(category);
-            Debug.Log(questionText);
-            foreach (var choice in choices)
-            {
-                Debug.Log(choice);
-            }
-            Debug.Log(answer);
-        }
     }
 }

@@ -9,18 +9,11 @@ namespace QuizGame.Runtime.Model
         [SerializeField] private Question[] questions;
 
         public Question[] Questions => questions;
+        public int Score { get; set; }
 
         public Quiz(Question[] questions)
         {
             this.questions = questions;
-        }
-
-        public void Log()
-        {
-            foreach (var question in questions)
-            {
-                question.Log();
-            }
         }
     }
 }

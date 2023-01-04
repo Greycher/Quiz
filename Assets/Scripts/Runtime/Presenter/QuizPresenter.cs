@@ -2,6 +2,7 @@
 using System.Collections;
 using Newtonsoft.Json;
 using QuizGame.Runtime.Model;
+using QuizGame.Runtime.SettingRegistry.Settings;
 using QuizGame.Runtime.View;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -13,16 +14,23 @@ namespace QuizGame.Runtime.Presenter
     {
         [SerializeField] private QuizView quizView;
         [SerializeField] private TimerView timerView;
+        [SerializeField] private ScoreView scoreView;
         
         private Quiz _quiz;
+        private QuizSetting _quizSetting;
         private int _currentQuestionIndex;
         
         private Question CurrentQuestion => _quiz.Questions[_currentQuestionIndex];
         
         private void Awake()
         {
-            StartCoroutine(FetchQuizRoutine());
+            _quizSetting = SettingRegistry.SettingRegistry.Load<QuizSetting>();
+            
             timerView.gameObject.SetActive(false);
+            scoreView.UpdateScore(0);
+            scoreView.gameObject.SetActive(false);
+            
+            StartCoroutine(FetchQuizRoutine());
         }
 
         //TODO background task manager
@@ -71,8 +79,6 @@ namespace QuizGame.Runtime.Presenter
         
         private void OnAnswerSelected(Answer answer)
         {
-            timerView.StopTimer();
-            quizView.OnAnswerSelect -= OnAnswerSelected;
             if (answer == CurrentQuestion.Answer)
             {
                 StartCoroutine(OnCorrectAnswer(answer));
@@ -85,6 +91,7 @@ namespace QuizGame.Runtime.Presenter
 
         private IEnumerator OnCorrectAnswer(Answer answer)
         {
+            OnQuestionSessionEnd(QuestionResult.CorrectAnswer);
             yield return quizView.AnimateCorrectAnswer(answer);
             if (++_currentQuestionIndex < _quiz.Questions.Length)
             {
@@ -98,14 +105,25 @@ namespace QuizGame.Runtime.Presenter
         
         private IEnumerator OnWrongAnswer(Answer answer)
         {
+            OnQuestionSessionEnd(QuestionResult.WrongAnswer);
             yield return quizView.AnimateWrongAnswer(answer);
             EndQuiz(false);
         }
 
         private void OnTimerCompleted()
         {
-            quizView.OnAnswerSelect -= OnAnswerSelected;
+            OnQuestionSessionEnd(QuestionResult.TimeOut);
             EndQuiz(false);
+        }
+
+        private void OnQuestionSessionEnd(QuestionResult result)
+        {
+            quizView.OnAnswerSelect -= OnAnswerSelected;
+            
+            timerView.StopTimer();
+            
+            _quiz.Score += _quizSetting.GetQuestionResultScore(result);
+            scoreView.UpdateScore(_quiz.Score);
         }
 
         private void EndQuiz(bool success)
