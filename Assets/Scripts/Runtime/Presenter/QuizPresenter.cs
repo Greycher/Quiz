@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
+using ColorTilesHop.Runtime;
+using ColorTilesHop.Runtime.Signals;
 using Newtonsoft.Json;
 using QuizGame.Runtime.Model;
 using QuizGame.Runtime.SettingRegistry.Settings;
 using QuizGame.Runtime.View;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Networking;
 
 namespace QuizGame.Runtime.Presenter
@@ -19,15 +22,16 @@ namespace QuizGame.Runtime.Presenter
         private Quiz _quiz;
         private QuizSetting _quizSetting;
         private int _currentQuestionIndex;
-        
+        private bool _started;
+
         private Question CurrentQuestion => _quiz.Questions[_currentQuestionIndex];
         
         private void Awake()
         {
             _quizSetting = SettingRegistry.SettingRegistry.Load<QuizSetting>();
             
-            timerView.gameObject.SetActive(false);
             scoreView.UpdateScore(0);
+            timerView.gameObject.SetActive(false);
             scoreView.gameObject.SetActive(false);
             
             StartCoroutine(FetchQuizRoutine());
@@ -59,6 +63,28 @@ namespace QuizGame.Runtime.Presenter
         [Button]
         public void StartQuiz()
         {
+            Assert.IsFalse(_started);
+            
+            _started = true;
+            
+            if (_quiz != null)
+            {
+                IntenalStartQuiz();
+            }
+            else
+            {
+                StartCoroutine(StartQuizAfterCreationRoutine());
+            }
+        }
+
+        private IEnumerator StartQuizAfterCreationRoutine()
+        {
+            yield return new WaitUntil(() => _quiz != null);
+            IntenalStartQuiz();
+        }
+
+        private void IntenalStartQuiz()
+        {
             _currentQuestionIndex = 0;
             AskQuestion();
         }
@@ -73,6 +99,7 @@ namespace QuizGame.Runtime.Presenter
             yield return quizView.SetNextQuestionRoutine(question);
             quizView.OnAnswerSelect += OnAnswerSelected;
             timerView.gameObject.SetActive(true);
+            scoreView.gameObject.SetActive(true);
             //TODO take seconds from a setting
             timerView.StartTimer(20, OnTimerCompleted);
         }
@@ -128,7 +155,18 @@ namespace QuizGame.Runtime.Presenter
 
         private void EndQuiz(bool success)
         {
-            Debug.Log($"Quiz resulted in {(success ? "success" : "fail")}");
+            Assert.IsTrue(_started);
+
+            _started = false;
+            
+            if (success)
+            {
+                SignalBus<QuizSucceedSignal>.Emit(new QuizSucceedSignal());
+            }
+            else
+            {
+                SignalBus<QuizFailedSignal>.Emit(new QuizFailedSignal());
+            }
         }
     }
 }

@@ -10,10 +10,9 @@ namespace QuizGame.Runtime.View
     {
         [SerializeField] private Button button;
         [SerializeField] private TextMeshProUGUI label;
-        [SerializeField] private Animator animator;
-        [SerializeField, AnimatorState(nameof(animator))] private int correctAnswerAnimatorState;
-        [SerializeField, AnimatorState(nameof(animator))] private int wrongAnswerAnimatorState;
-        [SerializeField, AnimatorState(nameof(animator))] private int defaultAnimatorState;
+        [SerializeField] private AnimatorStatePlayer correctAnswerAnimatorState;
+        [SerializeField] private AnimatorStatePlayer wrongAnswerAnimatorState;
+        [SerializeField] private AnimatorStatePlayer defaultAnimatorState;
 
         public bool Interactable
         {
@@ -45,23 +44,17 @@ namespace QuizGame.Runtime.View
 
         public IEnumerator AnimateCorrectAnswer()
         {
-            animator.Play(correctAnswerAnimatorState);
-            animator.Update(0);
-            Debug.Log($"length: {animator.GetCurrentAnimatorStateInfo(0).length}");
-            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+            yield return new WaitForSeconds(correctAnswerAnimatorState.Play());
         }
 
         public IEnumerator AnimateWrongAnswer()
         {
-            animator.Play(wrongAnswerAnimatorState);
-            animator.Update(0);
-            Debug.Log($"length: {animator.GetCurrentAnimatorStateInfo(0).length}");
-            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+            yield return new WaitForSeconds(wrongAnswerAnimatorState.Play());
         }
 
         public void ResetAnimation()
         {
-            animator.Play(defaultAnimatorState);
+            defaultAnimatorState.Play();
         }
     }
 }
