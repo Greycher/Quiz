@@ -13,6 +13,8 @@ using UnityEngine.Networking;
 
 namespace QuizGame.Runtime.Presenter
 {
+    //TODO configurable timing
+    //TODO make buttons non-interactable after answer
     public class QuizPresenter : MonoBehaviour
     {
         [SerializeField] private QuizView quizView;
@@ -150,6 +152,7 @@ namespace QuizGame.Runtime.Presenter
             timerView.StopTimer();
             
             _quiz.Score += _quizSetting.GetQuestionResultScore(result);
+            //Update after animation
             scoreView.UpdateScore(_quiz.Score);
         }
 

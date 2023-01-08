@@ -55,7 +55,7 @@ namespace QuizGame.Runtime.View
             NextQuestionView = temp;
             
             //TODO make animation synchronous
-            CurrentQuestionView.SetQuestionRoutine(question);
+            CurrentQuestionView.SetQuestion(question);
             yield return NextQuestionView.LeaveScreen();
             yield return CurrentQuestionView.EnterScreen();
         }

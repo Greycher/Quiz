@@ -33,18 +33,18 @@ namespace QuizGame.Runtime.View
 
         private void OnEnable()
         {
-            choiceAView.OnClick += () => OnAnswerSelected(Answer.A);
-            choiceBView.OnClick += () => OnAnswerSelected(Answer.B);
-            choiceCView.OnClick += () => OnAnswerSelected(Answer.C);
-            choiceDView.OnClick += () => OnAnswerSelected(Answer.D);
+            choiceAView.OnClick.AddListener(() => OnAnswerSelected(Answer.A));
+            choiceBView.OnClick.AddListener(() => OnAnswerSelected(Answer.B));
+            choiceCView.OnClick.AddListener(() => OnAnswerSelected(Answer.C));
+            choiceDView.OnClick.AddListener(() => OnAnswerSelected(Answer.D));
         }
         
         private void OnDisable()
         {
-            choiceAView.OnClick = null;
-            choiceBView.OnClick = null;
-            choiceCView.OnClick = null;
-            choiceDView.OnClick = null;
+            choiceAView.OnClick.RemoveAllListeners();
+            choiceBView.OnClick.RemoveAllListeners();
+            choiceCView.OnClick.RemoveAllListeners();
+            choiceDView.OnClick.RemoveAllListeners();
         }
         
         private void SetButtonsInteractable(bool interactable)
@@ -65,7 +65,7 @@ namespace QuizGame.Runtime.View
             animator.SetFloat(screenBlendParam, value);
         }
 
-        public void SetQuestionRoutine(Question question)
+        public void SetQuestion(Question question)
         {
             questionLabel.text = question.QuestionText;
             choiceAView.SetChoiceText(question.ChoiceA);

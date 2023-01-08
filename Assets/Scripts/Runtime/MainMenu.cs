@@ -2,6 +2,7 @@
 using System.Collections;
 using Newtonsoft.Json;
 using QuizGame.Runtime.Model;
+using QuizGame.Runtime.Presenter;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
@@ -15,13 +16,7 @@ namespace QuizGame.Runtime
         [SerializeField] private Button playButton;
         [SerializeField] private Button leaderboardButton;
         [SerializeField] private Button quitButton;
-        
-        private GraphicRaycaster _raycaster;
-
-        private void Awake()
-        {
-            _raycaster = GetComponent<GraphicRaycaster>();
-        }
+        [SerializeField] private LeaderboardPresenter leaderboardPresenter;
 
         private void OnEnable()
         {
@@ -44,36 +39,9 @@ namespace QuizGame.Runtime
         
         private void OnLeaderboardButtonClicked()
         {
-            StartCoroutine(FetchLeaderboard());
+            leaderboardPresenter.ShowLeaderboardPopup();
         }
-
-        private IEnumerator FetchLeaderboard()
-        {
-            var eventSystem = EventSystem.current;
-            eventSystem.enabled = false;
-            UnityWebRequest request = UnityWebRequest.Get("localhost:8080/leaderboard?page=0");
-            yield return request.SendWebRequest();
-
-            if (request.isNetworkError || request.isHttpError)
-            {
-                throw new Exception(request.error);
-            }
-            
-            Debug.Log(request.downloadHandler.text);
-            
-            // try
-            // {
-            //     _quiz = JsonConvert.DeserializeObject<Quiz>(request.downloadHandler.text);
-            //     Debug.Log("Quiz creation succeed.");
-            // }
-            // catch (JsonReaderException  e)
-            // {
-            //     throw new Exception($"Invalid character at position {e.LineNumber}, {e.LinePosition}");
-            // }
-            
-            eventSystem.enabled = true;
-        }
-
+        
         private void OnQuitButtonClicked()
         {
             Application.Quit();

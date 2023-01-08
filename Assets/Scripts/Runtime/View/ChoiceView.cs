@@ -20,23 +20,12 @@ namespace QuizGame.Runtime.View
             set => button.interactable = true;
         }
 
-        public Action OnClick;
+        public Button.ButtonClickedEvent OnClick
+        {
+            get => button.onClick;
+            set => button.onClick = value;
+        }
         
-        private void OnEnable()
-        {
-            button.onClick.AddListener(OnButtonClicked);
-        }
-
-        private void OnButtonClicked()
-        {
-            OnClick?.Invoke();
-        }
-
-        private void OnDisable()
-        {
-            button.onClick.RemoveListener(OnButtonClicked);
-        }
-
         public void SetChoiceText(string answer)
         {
             label.text = answer;

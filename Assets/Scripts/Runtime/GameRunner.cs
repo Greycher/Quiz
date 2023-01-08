@@ -24,8 +24,8 @@ namespace QuizGame.Runtime
 
         private void OnDestroy()
         {
-            SignalBus<QuizSucceedSignal>.AddListener(OnQuizSucceed);
-            SignalBus<QuizFailedSignal>.AddListener(OnQuizFailed);
+            SignalBus<QuizSucceedSignal>.RemoveListener(OnQuizSucceed);
+            SignalBus<QuizFailedSignal>.RemoveListener(OnQuizFailed);
         }
 
         private void OnQuizSucceed(QuizSucceedSignal t)

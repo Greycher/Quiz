@@ -1,12 +1,11 @@
+#To run;
+#flask run -p 8080
+
 from flask import Flask
 from flask import request
 from pathlib import Path
 
 app = Flask(__name__)
-
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
 
 @app.route("/leaderboard")
 def leaderboard():

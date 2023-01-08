@@ -10,8 +10,7 @@ namespace QuizGame.Runtime.MenuSystem
     {
         private Queue<Command> _pendingCommands = new Queue<Command>();
         private Command _commandOnExecution;
-        private Menu _currentMenu;
-        private Menu _predictedMenu;
+        private Menu _menuAfterAllCommandsExecuted;
 
         private static MenuManager _instance;
 
@@ -32,11 +31,32 @@ namespace QuizGame.Runtime.MenuSystem
             }
         }
 
+        private void Awake()
+        {
+            if (_instance == null)
+            {
+                Debug.Log($"First {nameof(MenuManager)} instance");
+                _instance = this;
+            }
+            else
+            {
+                if (_instance != this)
+                {
+                    Debug.Log($"Repeateed {nameof(MenuManager)} instance, destroying");
+                    Destroy(this);
+                }
+                else
+                {
+                    Debug.Log($"First {nameof(MenuManager)} instance");
+                }
+            }
+        }
+
         public void OpenMenu(Menu menu)
         {
-            if (_predictedMenu)
+            if (_menuAfterAllCommandsExecuted)
             {
-                if (_predictedMenu == menu)
+                if (_menuAfterAllCommandsExecuted == menu)
                 {
                     return;
                 }
@@ -44,15 +64,15 @@ namespace QuizGame.Runtime.MenuSystem
                 CloseMenu();
             }
 
-            _predictedMenu = menu;
+            _menuAfterAllCommandsExecuted = menu;
             ExecuteOrQueueCommand(new OpenMenuCommand(menu, this, OnOpenMenuCommandExecuted));
         }
 
         public void CloseMenu()
         {
-            Assert.IsTrue(_predictedMenu);
-            ExecuteOrQueueCommand(new CloseMenuCommand(_predictedMenu, this, OnCloseMenuCommandExecuted));
-            _predictedMenu = null;
+            Assert.IsTrue(_menuAfterAllCommandsExecuted);
+            ExecuteOrQueueCommand(new CloseMenuCommand(_menuAfterAllCommandsExecuted, this, OnCloseMenuCommandExecuted));
+            _menuAfterAllCommandsExecuted = null;
         }
 
         private void ExecuteOrQueueCommand(Command command)
@@ -69,14 +89,12 @@ namespace QuizGame.Runtime.MenuSystem
 
         private void OnOpenMenuCommandExecuted(Menu menu)
         {
-            _currentMenu = menu;
             _commandOnExecution = null;
             ExecuteNextCommand();
         }
         
         private void OnCloseMenuCommandExecuted(Menu menu)
         {
-            _currentMenu = null;
             _commandOnExecution = null;
             ExecuteNextCommand();
         }
@@ -93,6 +111,16 @@ namespace QuizGame.Runtime.MenuSystem
         {
             _commandOnExecution = command;
             _commandOnExecution.Execute();
+        }
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            if (_instance == this)
+            {
+                Debug.Log($"{nameof(MenuManager)} instance lifetime over");
+                _instance = null;
+            }
         }
 
         private abstract class Command
