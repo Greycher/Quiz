@@ -15,3 +15,8 @@ MonoBehaviour:
   correctAnswerScore: 5
   wrongAnswerScore: -5
   timeOutScore: -3
+  TimePerQuestion: 20
+  QuestionEnterAnimDuration: 0.5
+  QuestionExitAnimDuration: 0.5
+  ShouldContinueToNextQuestionOnWrongAnswer: 1
+  ShouldContinueToNextQuestionOnTimerExpired: 0

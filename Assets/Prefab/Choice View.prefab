@@ -194,6 +194,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 1040070816912102474}
   label: {fileID: 7636957595797869759}
+  selectedAnswerAnimation:
+    animator: {fileID: 4182033771822834925}
+    layerIndex: 0
+    animatorState: 232289201
   correctAnswerAnimatorState:
     animator: {fileID: 4182033771822834925}
     layerIndex: 0

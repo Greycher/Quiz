@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +9,7 @@ namespace QuizGame.Runtime.View
     {
         [SerializeField] private Button button;
         [SerializeField] private TextMeshProUGUI label;
+        [SerializeField] private AnimatorStatePlayer selectedAnswerAnimation;
         [SerializeField] private AnimatorStatePlayer correctAnswerAnimatorState;
         [SerializeField] private AnimatorStatePlayer wrongAnswerAnimatorState;
         [SerializeField] private AnimatorStatePlayer defaultAnimatorState;
@@ -17,7 +17,7 @@ namespace QuizGame.Runtime.View
         public bool Interactable
         {
             get => button.interactable;
-            set => button.interactable = true;
+            set => button.interactable = value;
         }
 
         public Button.ButtonClickedEvent OnClick
@@ -31,14 +31,19 @@ namespace QuizGame.Runtime.View
             label.text = answer;
         }
 
-        public IEnumerator AnimateCorrectAnswer()
+        public IEnumerator AnimateSelectedAnswer()
         {
-            yield return new WaitForSeconds(correctAnswerAnimatorState.Play());
+            yield return new WaitForSeconds(selectedAnswerAnimation.Play());
         }
 
-        public IEnumerator AnimateWrongAnswer()
+        public void VisualiseCorrectAnswer()
         {
-            yield return new WaitForSeconds(wrongAnswerAnimatorState.Play());
+            correctAnswerAnimatorState.Play();
+        }
+        
+        public void VisualiseWrongAnswer()
+        {
+            wrongAnswerAnimatorState.Play();
         }
 
         public void ResetAnimation()

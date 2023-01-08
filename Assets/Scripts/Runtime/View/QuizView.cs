@@ -37,8 +37,8 @@ namespace QuizGame.Runtime.View
 
         private void Awake()
         {
-            firstQuestionView.LeaveScreenImmediate();
-            secondQuestionView.LeaveScreenImmediate();
+            firstQuestionView.ExitScreenImmediate();
+            secondQuestionView.ExitScreenImmediate();
             CurrentQuestionView = secondQuestionView;
             NextQuestionView = firstQuestionView;
         }
@@ -56,18 +56,23 @@ namespace QuizGame.Runtime.View
             
             //TODO make animation synchronous
             CurrentQuestionView.SetQuestion(question);
-            yield return NextQuestionView.LeaveScreen();
+            yield return NextQuestionView.ExitScreen();
             yield return CurrentQuestionView.EnterScreen();
         }
-
-        public IEnumerator AnimateCorrectAnswer(Answer answer)
+        
+        public IEnumerator AnimateSelectedAnswer(Answer answer)
         {
-            yield return CurrentQuestionView.AnimateCorrectAnswer(answer);
+            yield return CurrentQuestionView.AnimateSelectedAnswer(answer);
         }
-
-        public IEnumerator AnimateWrongAnswer(Answer answer)
+        
+        public void VisualiseCorrectAnswer(Answer answer)
         {
-            yield return CurrentQuestionView.AnimateWrongAnswer(answer);
+            CurrentQuestionView.VisualiseCorrectAnswer(answer);
+        }
+        
+        public void VisualiseWrongAnswer(Answer answer)
+        {
+            CurrentQuestionView.VisualiseWrongAnswer(answer);
         }
     }
 }

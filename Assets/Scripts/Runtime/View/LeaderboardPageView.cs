@@ -1,4 +1,5 @@
 ﻿using System;
+using QuizGame.Runtime.MenuSystem;
 using QuizGame.Runtime.Model;
 using TMPro;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 
 namespace QuizGame.Runtime.View
 {
-    public class LeaderboardPageView : MonoBehaviour
+    public class LeaderboardPageView : Menu
     {
         [SerializeField] private LeaderboardPlayerDataView[] leaderboardPlayerDataView = new LeaderboardPlayerDataView[10];
         [SerializeField] private Button closeButton;

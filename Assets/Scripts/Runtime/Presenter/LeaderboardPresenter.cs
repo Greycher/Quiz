@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using QuizGame.Runtime.Model;
 using QuizGame.Runtime.View;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Networking;
 
 namespace QuizGame.Runtime.Presenter
@@ -14,6 +15,7 @@ namespace QuizGame.Runtime.Presenter
         [SerializeField] private LeaderboardPageView leaderboardPageView;
 
         private List<LeaderBoardPage> _leaderBoardPages = new List<LeaderBoardPage>();
+        private bool _shown;
 
         private void OnEnable()
         {
@@ -29,17 +31,20 @@ namespace QuizGame.Runtime.Presenter
         
         private void OnPageIndexChanged(int pageIndex)
         {
+            Assert.IsTrue(pageIndex > 0 && pageIndex < _leaderBoardPages.Count);
             leaderboardPageView.SetLeaderboardPage(_leaderBoardPages[pageIndex]);
         }
         
         private void OnCloseButtonClicked()
         {
-            leaderboardPageView.gameObject.SetActive(false);
+            StartCoroutine(HideLeaderboardRoutine());
         }
 
-        public void ShowLeaderboardPopup()
+        private IEnumerator HideLeaderboardRoutine()
         {
-            StartCoroutine(ShowLeaderboardRoutine());
+            yield return leaderboardPageView.OutroAnimationRoutine();
+            leaderboardPageView.gameObject.SetActive(false);
+            _shown = false;
         }
         
         private IEnumerator ShowLeaderboardRoutine()
@@ -81,6 +86,19 @@ namespace QuizGame.Runtime.Presenter
             
             leaderboardPageView.gameObject.SetActive(true);
             leaderboardPageView.SetLeaderboardPage(_leaderBoardPages[0]);
+            StartCoroutine(leaderboardPageView.EntryAnimationRoutine());
+        }
+        
+        
+        public void ShowLeaderboardPopup()
+        {
+            if (_shown)
+            {
+                return;
+            }
+            
+            _shown = true;
+            StartCoroutine(ShowLeaderboardRoutine());
         }
     }
 }

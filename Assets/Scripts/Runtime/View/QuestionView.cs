@@ -2,6 +2,7 @@
 using System.Collections;
 using DG.Tweening;
 using QuizGame.Runtime.Model;
+using QuizGame.Runtime.SettingRegistry.Settings;
 using TMPro;
 using UnityEngine;
 
@@ -23,11 +24,14 @@ namespace QuizGame.Runtime.View
         [SerializeField] private float outerRightBlendValue = 1f;
 
         public Action<Answer> OnAswerSelect;
+        
+        private QuizSetting _quizSetting;
         private float _screenBlendValue;
         private bool _onScreen;
-        
+
         private void Awake()
         {
+            _quizSetting = SettingRegistry.SettingRegistry.Load<QuizSetting>();
             _screenBlendValue = (outerLeftBlendValue + outerRightBlendValue) / 2;
         }
 
@@ -38,13 +42,16 @@ namespace QuizGame.Runtime.View
             choiceCView.OnClick.AddListener(() => OnAnswerSelected(Answer.C));
             choiceDView.OnClick.AddListener(() => OnAnswerSelected(Answer.D));
         }
-        
-        private void OnDisable()
+
+        private void OnAnswerSelected(Answer answer)
         {
-            choiceAView.OnClick.RemoveAllListeners();
-            choiceBView.OnClick.RemoveAllListeners();
-            choiceCView.OnClick.RemoveAllListeners();
-            choiceDView.OnClick.RemoveAllListeners();
+            OnAswerSelect?.Invoke(answer);
+            SetButtonsInteractable(false);
+        }
+
+        private void ScreenBlendSetter(float value)
+        {
+            animator.SetFloat(screenBlendParam, value);
         }
         
         private void SetButtonsInteractable(bool interactable)
@@ -53,16 +60,6 @@ namespace QuizGame.Runtime.View
             choiceBView.Interactable = interactable;
             choiceCView.Interactable = interactable;
             choiceDView.Interactable = interactable;
-        }
-
-        private void OnAnswerSelected(Answer answer)
-        {
-            OnAswerSelect?.Invoke(answer);
-        }
-
-        private void ScreenBlendSetter(float value)
-        {
-            animator.SetFloat(screenBlendParam, value);
         }
 
         public void SetQuestion(Question question)
@@ -86,13 +83,14 @@ namespace QuizGame.Runtime.View
                 yield break;
             }
             
-            DOTween.To(ScreenBlendSetter, outerLeftBlendValue, _screenBlendValue, 0.5f);
-            yield return new WaitForSeconds(0.5f);
+            var d = _quizSetting.QuestionEnterAnimDuration;
+            DOTween.To(ScreenBlendSetter, outerLeftBlendValue, _screenBlendValue, d);
+            yield return new WaitForSeconds(d);
             _onScreen = true;
             SetButtonsInteractable(true);
         }
         
-        public IEnumerator LeaveScreen()
+        public IEnumerator ExitScreen()
         {
             if (!_onScreen)
             {
@@ -100,16 +98,33 @@ namespace QuizGame.Runtime.View
             }
             
             SetButtonsInteractable(false);
-            DOTween.To(ScreenBlendSetter, _screenBlendValue, outerRightBlendValue, 0.5f);
-            yield return new WaitForSeconds(0.5f);
+            
+            var d = _quizSetting.QuestionExitAnimDuration;
+            DOTween.To(ScreenBlendSetter, _screenBlendValue, outerRightBlendValue, d);
+            yield return new WaitForSeconds(d);
             _onScreen = false;
         }
         
-        public void LeaveScreenImmediate()
+        public void ExitScreenImmediate()
         {
             _onScreen = false;
             SetButtonsInteractable(false);
             ScreenBlendSetter(outerRightBlendValue);
+        }
+
+        public IEnumerator AnimateSelectedAnswer(Answer answer)
+        {
+            yield return GetToChoiceView(answer).AnimateSelectedAnswer();
+        }
+        
+        public void VisualiseCorrectAnswer(Answer answer)
+        {
+            GetToChoiceView(answer).VisualiseCorrectAnswer();
+        }
+        
+        public void VisualiseWrongAnswer(Answer answer)
+        {
+            GetToChoiceView(answer).VisualiseWrongAnswer();
         }
 
         private ChoiceView GetToChoiceView(Answer answer)
@@ -127,16 +142,6 @@ namespace QuizGame.Runtime.View
             }
 
             return null;
-        }
-
-        public IEnumerator AnimateCorrectAnswer(Answer answer)
-        {
-            yield return GetToChoiceView(answer).AnimateCorrectAnswer();
-        }
-
-        public IEnumerator AnimateWrongAnswer(Answer answer)
-        {
-            yield return GetToChoiceView(answer).AnimateWrongAnswer();
         }
     }
 }

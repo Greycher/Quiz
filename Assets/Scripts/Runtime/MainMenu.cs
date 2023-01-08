@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using Newtonsoft.Json;
-using QuizGame.Runtime.Model;
-using QuizGame.Runtime.Presenter;
+﻿using QuizGame.Runtime.Presenter;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace QuizGame.Runtime

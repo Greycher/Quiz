@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,7 +15,10 @@ namespace QuizGame.Runtime.MenuSystem
         private void Awake()
         {
             _graphicRaycaster = GetComponent<GraphicRaycaster>();
-            _graphicRaycaster.enabled = false;
+            if (_graphicRaycaster)
+            {
+                _graphicRaycaster.enabled = false;
+            }
         }
 
         public IEnumerator EntryAnimationRoutine()

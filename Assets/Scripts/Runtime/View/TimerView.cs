@@ -11,6 +11,7 @@ namespace QuizGame.Runtime.View
     {
         [SerializeField] private TextMeshProUGUI timerLabel;
         [SerializeField] private Image fillImage;
+        [SerializeField] private int fps = 8;
 
         private Coroutine _coroutine;
 
@@ -30,10 +31,11 @@ namespace QuizGame.Runtime.View
         {
             var seconds = initialSeconds;
             UpdateTimer(initialSeconds, seconds);
+            var interval = 1 / (float)fps;
             while (true)
             {
-                yield return new WaitForSeconds(0.25f);
-                UpdateTimer(initialSeconds, seconds -= 0.125f);
+                yield return new WaitForSeconds(interval);
+                UpdateTimer(initialSeconds, seconds -= interval);
                 if (seconds <= 0)
                 {
                     break;

@@ -8,7 +8,7 @@ namespace QuizGame.Runtime.MenuSystem
 {
     public class MenuManager : MonoBehaviour
     {
-        private Queue<Command> _pendingCommands = new Queue<Command>();
+        private readonly Queue<Command> _pendingCommands = new Queue<Command>();
         private Command _commandOnExecution;
         private Menu _menuAfterAllCommandsExecuted;
 
@@ -33,23 +33,13 @@ namespace QuizGame.Runtime.MenuSystem
 
         private void Awake()
         {
-            if (_instance == null)
+            if (_instance != null && _instance != this)
             {
-                Debug.Log($"First {nameof(MenuManager)} instance");
-                _instance = this;
+                Destroy(this);
+                return;
             }
-            else
-            {
-                if (_instance != this)
-                {
-                    Debug.Log($"Repeateed {nameof(MenuManager)} instance, destroying");
-                    Destroy(this);
-                }
-                else
-                {
-                    Debug.Log($"First {nameof(MenuManager)} instance");
-                }
-            }
+
+            _instance = this;
         }
 
         public void OpenMenu(Menu menu)
@@ -115,10 +105,8 @@ namespace QuizGame.Runtime.MenuSystem
 
         private void OnDestroy()
         {
-            StopAllCoroutines();
             if (_instance == this)
             {
-                Debug.Log($"{nameof(MenuManager)} instance lifetime over");
                 _instance = null;
             }
         }
