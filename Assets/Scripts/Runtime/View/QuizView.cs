@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using QuizGame.Runtime.Model;
 using UnityEngine;
 
@@ -48,21 +49,22 @@ namespace QuizGame.Runtime.View
             OnAnswerSelect?.Invoke(answer);
         }
 
-        public IEnumerator SetNextQuestionRoutine(Question question)
+        public async UniTask SetNextQuestionRoutine(Question question)
         {
             var temp = CurrentQuestionView;
             CurrentQuestionView = NextQuestionView;
             NextQuestionView = temp;
             
-            //TODO make animation synchronous
             CurrentQuestionView.SetQuestion(question);
-            yield return NextQuestionView.ExitScreen();
-            yield return CurrentQuestionView.EnterScreen();
+
+            await UniTask.WhenAll(
+                NextQuestionView.ExitScreen(), 
+                CurrentQuestionView.EnterScreen());
         }
         
-        public IEnumerator AnimateSelectedAnswer(Answer answer)
+        public async UniTask AnimateSelectedAnswer(Answer answer)
         {
-            yield return CurrentQuestionView.AnimateSelectedAnswer(answer);
+            await CurrentQuestionView.AnimateSelectedAnswer(answer);
         }
         
         public void VisualiseCorrectAnswer(Answer answer)

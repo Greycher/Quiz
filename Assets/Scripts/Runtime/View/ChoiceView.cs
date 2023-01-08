@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,9 +33,10 @@ namespace QuizGame.Runtime.View
             label.text = answer;
         }
 
-        public IEnumerator AnimateSelectedAnswer()
+        public async UniTask AnimateSelectedAnswer()
         {
-            yield return new WaitForSeconds(selectedAnswerAnimation.Play());
+            var d = selectedAnswerAnimation.Play();
+            await UniTask.Delay(TimeSpan.FromSeconds(d));
         }
 
         public void VisualiseCorrectAnswer()

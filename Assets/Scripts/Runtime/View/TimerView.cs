@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -13,28 +14,31 @@ namespace QuizGame.Runtime.View
         [SerializeField] private Image fillImage;
         [SerializeField] private int fps = 8;
 
-        private Coroutine _coroutine;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
 
         public void StartTimer(int seconds, Action onComplete)
         {
             Assert.IsTrue(seconds > 0);
             StopTimer();
-            StartCoroutine(CountDownRoutine(seconds, onComplete));
+            CountDownRoutine(seconds, onComplete);
         }
         
         public void StopTimer()
         {
-            StopAllCoroutines();
+            _cts.Cancel();
         }
 
-        private IEnumerator CountDownRoutine(float initialSeconds, Action onComplete)
+        private async UniTask CountDownRoutine(float initialSeconds, Action onComplete)
         {
             var seconds = initialSeconds;
             UpdateTimer(initialSeconds, seconds);
             var interval = 1 / (float)fps;
             while (true)
             {
-                yield return new WaitForSeconds(interval);
+                _cts = new CancellationTokenSource();
+                await UniTask.Delay(TimeSpan.FromSeconds(interval), 
+                    DelayType.DeltaTime, PlayerLoopTiming.Update, _cts.Token);
+                
                 UpdateTimer(initialSeconds, seconds -= interval);
                 if (seconds <= 0)
                 {

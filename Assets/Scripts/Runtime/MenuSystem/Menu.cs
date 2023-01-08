@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,31 +14,35 @@ namespace QuizGame.Runtime.MenuSystem
         
         private GraphicRaycaster _graphicRaycaster;
 
-        private void Awake()
+        private bool Interactable
         {
-            _graphicRaycaster = GetComponent<GraphicRaycaster>();
-            if (_graphicRaycaster)
+            set
             {
-                _graphicRaycaster.enabled = false;
+                if (_graphicRaycaster)
+                {
+                    _graphicRaycaster.enabled = value;
+                }
             }
         }
 
-        public IEnumerator EntryAnimationRoutine()
+        private void Awake()
         {
-            yield return new WaitForSeconds(entryAnimState.Play());
-            if (_graphicRaycaster)
-            {
-                _graphicRaycaster.enabled = true;
-            }
+            _graphicRaycaster = GetComponent<GraphicRaycaster>();
+            Interactable = false;
+        }
+
+        public async UniTask EntryAnimationRoutine()
+        {
+            var d = entryAnimState.Play();
+            await UniTask.Delay(TimeSpan.FromSeconds(d));
+            Interactable = true;
         }
         
-        public IEnumerator OutroAnimationRoutine()
+        public async UniTask OutroAnimationRoutine()
         {
-            if (_graphicRaycaster)
-            {
-                _graphicRaycaster.enabled = false;
-            }
-            yield return new WaitForSeconds(outroAnimState.Play());
+            Interactable = false;
+            var d = outroAnimState.Play();
+            await UniTask.Delay(TimeSpan.FromSeconds(d));
         }
     }
 }

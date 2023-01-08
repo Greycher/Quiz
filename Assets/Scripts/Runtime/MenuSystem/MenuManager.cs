@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -55,13 +54,13 @@ namespace QuizGame.Runtime.MenuSystem
             }
 
             _menuAfterAllCommandsExecuted = menu;
-            ExecuteOrQueueCommand(new OpenMenuCommand(menu, this, OnOpenMenuCommandExecuted));
+            ExecuteOrQueueCommand(new OpenMenuCommand(menu, OnOpenMenuCommandExecuted));
         }
 
         public void CloseMenu()
         {
             Assert.IsTrue(_menuAfterAllCommandsExecuted);
-            ExecuteOrQueueCommand(new CloseMenuCommand(_menuAfterAllCommandsExecuted, this, OnCloseMenuCommandExecuted));
+            ExecuteOrQueueCommand(new CloseMenuCommand(_menuAfterAllCommandsExecuted, OnCloseMenuCommandExecuted));
             _menuAfterAllCommandsExecuted = null;
         }
 
@@ -115,12 +114,10 @@ namespace QuizGame.Runtime.MenuSystem
         {
             protected readonly Menu _menu;
             protected readonly Action<Menu> _onCommandExecuted;
-            protected readonly MonoBehaviour _monoBehaviour;
 
-            public Command(Menu menu, MonoBehaviour monoBehaviour, Action<Menu> onCommandExecuted)
+            public Command(Menu menu, Action<Menu> onCommandExecuted)
             {
                 _menu = menu;
-                _monoBehaviour = monoBehaviour;
                 _onCommandExecuted = onCommandExecuted;
             }
             
@@ -129,35 +126,35 @@ namespace QuizGame.Runtime.MenuSystem
         
         private class OpenMenuCommand : Command
         {
-            public OpenMenuCommand(Menu menu, MonoBehaviour monoBehaviour, Action<Menu> onCommandExecuted) 
-                : base(menu, monoBehaviour, onCommandExecuted) { }
+            public OpenMenuCommand(Menu menu, Action<Menu> onCommandExecuted) 
+                : base(menu, onCommandExecuted) { }
 
             public override void Execute()
             {
-                _monoBehaviour.StartCoroutine(OpenMenuRoutine());
+                OpenMenuRoutine();
             }
 
-            private IEnumerator OpenMenuRoutine()
+            private async void OpenMenuRoutine()
             {
                 _menu.gameObject.SetActive(true);
-                yield return _menu.EntryAnimationRoutine();
+                await _menu.EntryAnimationRoutine();
                 _onCommandExecuted.Invoke(_menu);
             }
         }
         
         private class CloseMenuCommand : Command
         {
-            public CloseMenuCommand(Menu menu, MonoBehaviour monoBehaviour, Action<Menu> onCommandExecuted) 
-                : base(menu, monoBehaviour, onCommandExecuted) { }
+            public CloseMenuCommand(Menu menu, Action<Menu> onCommandExecuted) 
+                : base(menu, onCommandExecuted) { }
             
             public override void Execute()
             {
-                _monoBehaviour.StartCoroutine(CloseMenuRoutine());
+                CloseMenuRoutine();
             }
 
-            private IEnumerator CloseMenuRoutine()
+            private async void CloseMenuRoutine()
             {
-                yield return _menu.OutroAnimationRoutine();
+                await _menu.OutroAnimationRoutine();
                 _menu.gameObject.SetActive(false);
                 _onCommandExecuted.Invoke(_menu);
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using QuizGame.Runtime.Model;
 using QuizGame.Runtime.SettingRegistry.Settings;
@@ -76,32 +77,32 @@ namespace QuizGame.Runtime.View
             choiceDView.ResetAnimation();
         }
 
-        public IEnumerator EnterScreen()
+        public async UniTask EnterScreen()
         {
             if (_onScreen)
             {
-                yield break;
+                return;
             }
             
             var d = _quizSetting.QuestionEnterAnimDuration;
             DOTween.To(ScreenBlendSetter, outerLeftBlendValue, _screenBlendValue, d);
-            yield return new WaitForSeconds(d);
+            await UniTask.Delay(TimeSpan.FromSeconds(d));
             _onScreen = true;
             SetButtonsInteractable(true);
         }
         
-        public IEnumerator ExitScreen()
+        public async UniTask ExitScreen()
         {
             if (!_onScreen)
             {
-                yield break;
+                return;
             }
             
             SetButtonsInteractable(false);
             
             var d = _quizSetting.QuestionExitAnimDuration;
             DOTween.To(ScreenBlendSetter, _screenBlendValue, outerRightBlendValue, d);
-            yield return new WaitForSeconds(d);
+            await UniTask.Delay(TimeSpan.FromSeconds(d));
             _onScreen = false;
         }
         
@@ -112,9 +113,9 @@ namespace QuizGame.Runtime.View
             ScreenBlendSetter(outerRightBlendValue);
         }
 
-        public IEnumerator AnimateSelectedAnswer(Answer answer)
+        public async UniTask AnimateSelectedAnswer(Answer answer)
         {
-            yield return GetToChoiceView(answer).AnimateSelectedAnswer();
+            await GetToChoiceView(answer).AnimateSelectedAnswer();
         }
         
         public void VisualiseCorrectAnswer(Answer answer)

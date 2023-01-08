@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using QuizGame.Runtime.Model;
 using QuizGame.Runtime.View;
@@ -31,23 +31,37 @@ namespace QuizGame.Runtime.Presenter
         
         private void OnPageIndexChanged(int pageIndex)
         {
-            Assert.IsTrue(pageIndex > 0 && pageIndex < _leaderBoardPages.Count);
+            Assert.IsTrue(pageIndex >= 0 && pageIndex < _leaderBoardPages.Count);
             leaderboardPageView.SetLeaderboardPage(_leaderBoardPages[pageIndex]);
         }
         
         private void OnCloseButtonClicked()
         {
-            StartCoroutine(HideLeaderboardRoutine());
+            HideLeaderboardRoutine();
         }
 
-        private IEnumerator HideLeaderboardRoutine()
+        private async void HideLeaderboardRoutine()
         {
-            yield return leaderboardPageView.OutroAnimationRoutine();
+            await leaderboardPageView.OutroAnimationRoutine();
             leaderboardPageView.gameObject.SetActive(false);
             _shown = false;
         }
-        
-        private IEnumerator ShowLeaderboardRoutine()
+
+        public async void ShowLeaderboardPopup()
+        {
+            if (_shown)
+            {
+                return;
+            }
+            
+            _shown = true;
+            await FetchLeaderboard();
+            leaderboardPageView.gameObject.SetActive(true);
+            leaderboardPageView.SetLeaderboardPage(_leaderBoardPages[0]);
+            leaderboardPageView.EntryAnimationRoutine();
+        }
+
+        private async UniTask FetchLeaderboard()
         {
             _leaderBoardPages.Clear();
             var pageIndex = 0;
@@ -61,9 +75,12 @@ namespace QuizGame.Runtime.Presenter
                 
                 using (UnityWebRequest request = UnityWebRequest.Get($"localhost:8080/leaderboard?page={pageIndex++}"))
                 {
-                    yield return request.SendWebRequest();
+                    await request.SendWebRequest();
                     
-                    if (request.isNetworkError || request.isHttpError)
+                    var result = request.result;
+                    if (result == UnityWebRequest.Result.ConnectionError || 
+                        result == UnityWebRequest.Result.ProtocolError || 
+                        result == UnityWebRequest.Result.DataProcessingError)
                     {
                         throw new Exception(request.error);
                     }
@@ -83,22 +100,6 @@ namespace QuizGame.Runtime.Presenter
                     }
                 }
             }
-            
-            leaderboardPageView.gameObject.SetActive(true);
-            leaderboardPageView.SetLeaderboardPage(_leaderBoardPages[0]);
-            StartCoroutine(leaderboardPageView.EntryAnimationRoutine());
-        }
-        
-        
-        public void ShowLeaderboardPopup()
-        {
-            if (_shown)
-            {
-                return;
-            }
-            
-            _shown = true;
-            StartCoroutine(ShowLeaderboardRoutine());
         }
     }
 }

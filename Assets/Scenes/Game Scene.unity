@@ -322,6 +322,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timerLabel: {fileID: 1372848181}
   fillImage: {fileID: 281526}
+  fps: 8
 --- !u!223 &609474662
 Canvas:
   m_ObjectHideFlags: 0

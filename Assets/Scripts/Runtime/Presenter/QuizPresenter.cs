@@ -1,6 +1,7 @@
-﻿using System.Collections;
+﻿using System;
 using ColorTilesHop.Runtime;
 using ColorTilesHop.Runtime.Signals;
+using Cysharp.Threading.Tasks;
 using QuizGame.Runtime.Model;
 using QuizGame.Runtime.SettingRegistry.Settings;
 using QuizGame.Runtime.View;
@@ -9,7 +10,6 @@ using UnityEngine.Assertions;
 
 namespace QuizGame.Runtime.Presenter
 {
-    //TODO make buttons non-interactable after answer
     public class QuizPresenter : MonoBehaviour
     {
         [SerializeField] private Quiz quiz;
@@ -47,7 +47,7 @@ namespace QuizGame.Runtime.Presenter
 
         private void StartQuestionSession()
         {
-            StartCoroutine(SetQuestionRoutine(CurrentQuestion));
+            SetQuestionRoutine(CurrentQuestion);
         }
         
         private void EnQuestionSession(QuestionResult result)
@@ -63,10 +63,10 @@ namespace QuizGame.Runtime.Presenter
             SignalBus<QuizSessionEndSignal>.Emit(new QuizSessionEndSignal(_score));
         }
 
-        private IEnumerator SetQuestionRoutine(Question question)
+        private async UniTask SetQuestionRoutine(Question question)
         {
             quizView.OnAnswerSelect += OnAnswerSelected;
-            yield return quizView.SetNextQuestionRoutine(question);
+            await quizView.SetNextQuestionRoutine(question);
             timerView.StartTimer(_quizSetting.TimePerQuestion, OnTimerExpired);
         }
         
@@ -74,32 +74,32 @@ namespace QuizGame.Runtime.Presenter
         {
             if (answer == CurrentQuestion.Answer)
             {
-                StartCoroutine(OnCorrectAnswerRoutine(answer));
+                OnCorrectAnswerRoutine(answer);
             }
             else
             {
-                StartCoroutine(OnWrongAnswerRoutine(answer));
+                OnWrongAnswerRoutine(answer);
             }
         }
 
-        private IEnumerator OnCorrectAnswerRoutine(Answer answer)
+        private async UniTask OnCorrectAnswerRoutine(Answer answer)
         {
             EnQuestionSession(QuestionResult.CorrectAnswer);
-            yield return quizView.AnimateSelectedAnswer(answer);
+            await quizView.AnimateSelectedAnswer(answer);
             quizView.VisualiseCorrectAnswer(answer);
             scoreView.SetScoreAnimated(_score);
-            StartCoroutine(ContinueOrEndQuizSessionWithDelayRoutine(true));
+            ContinueOrEndQuizSessionWithDelayRoutine(true);
         }
 
-        private IEnumerator OnWrongAnswerRoutine(Answer answer)
+        private async UniTask OnWrongAnswerRoutine(Answer answer)
         {
             EnQuestionSession(QuestionResult.WrongAnswer);
-            yield return quizView.AnimateSelectedAnswer(answer);
+            await quizView.AnimateSelectedAnswer(answer);
             quizView.VisualiseWrongAnswer(answer);
             quizView.VisualiseCorrectAnswer(CurrentQuestion.Answer);
             scoreView.SetScoreAnimated(_score);
             var shouldContinue = _quizSetting.ShouldContinueToNextQuestionOnWrongAnswer;
-            StartCoroutine(ContinueOrEndQuizSessionWithDelayRoutine(shouldContinue));
+            ContinueOrEndQuizSessionWithDelayRoutine(shouldContinue);
         }
 
         private void OnTimerExpired()
@@ -108,12 +108,12 @@ namespace QuizGame.Runtime.Presenter
             quizView.VisualiseCorrectAnswer(CurrentQuestion.Answer);
             scoreView.SetScoreAnimated(_score);
             var shouldContinue = _quizSetting.ShouldContinueToNextQuestionOnTimerExpired;
-            StartCoroutine(ContinueOrEndQuizSessionWithDelayRoutine(shouldContinue));
+            ContinueOrEndQuizSessionWithDelayRoutine(shouldContinue);
         }
         
-        private IEnumerator ContinueOrEndQuizSessionWithDelayRoutine(bool shouldContinue)
+        private async UniTask ContinueOrEndQuizSessionWithDelayRoutine(bool shouldContinue)
         {
-            yield return new WaitForSeconds(_quizSetting.DelayAfterQuestionSessionEnd);
+            await UniTask.Delay(TimeSpan.FromSeconds(_quizSetting.DelayAfterQuestionSessionEnd));
             if (shouldContinue && ++_currentQuestionIndex < quiz.Questions.Length)
             {
                 StartQuestionSession();
