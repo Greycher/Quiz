@@ -20,7 +20,7 @@ namespace QuizGame.Runtime.View
         {
             Assert.IsTrue(seconds > 0);
             StopTimer();
-            CountDownRoutine(seconds, onComplete);
+            CountDownAsync(seconds, onComplete);
         }
         
         public void StopTimer()
@@ -28,7 +28,7 @@ namespace QuizGame.Runtime.View
             _cts.Cancel();
         }
 
-        private async UniTask CountDownRoutine(float initialSeconds, Action onComplete)
+        private async UniTask CountDownAsync(float initialSeconds, Action onComplete)
         {
             var seconds = initialSeconds;
             UpdateTimer(initialSeconds, seconds);

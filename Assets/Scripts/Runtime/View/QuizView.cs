@@ -49,7 +49,7 @@ namespace QuizGame.Runtime.View
             OnAnswerSelect?.Invoke(answer);
         }
 
-        public async UniTask SetNextQuestionRoutine(Question question)
+        public async UniTask SetNextQuestionAsync(Question question)
         {
             var temp = CurrentQuestionView;
             CurrentQuestionView = NextQuestionView;
@@ -58,13 +58,13 @@ namespace QuizGame.Runtime.View
             CurrentQuestionView.SetQuestion(question);
 
             await UniTask.WhenAll(
-                NextQuestionView.ExitScreen(), 
-                CurrentQuestionView.EnterScreen());
+                NextQuestionView.ExitScreenAsync(), 
+                CurrentQuestionView.EnterScreenAsync());
         }
         
-        public async UniTask AnimateSelectedAnswer(Answer answer)
+        public async UniTask AnimateSelectedAnswerAsync(Answer answer)
         {
-            await CurrentQuestionView.AnimateSelectedAnswer(answer);
+            await CurrentQuestionView.AnimateSelectedAnswerAsync(answer);
         }
         
         public void VisualiseCorrectAnswer(Answer answer)

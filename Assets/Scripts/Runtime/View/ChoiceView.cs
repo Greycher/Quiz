@@ -33,7 +33,7 @@ namespace QuizGame.Runtime.View
             label.text = answer;
         }
 
-        public async UniTask AnimateSelectedAnswer()
+        public async UniTask AnimateSelectedAnswerAsync()
         {
             var d = selectedAnswerAnimation.Play();
             await UniTask.Delay(TimeSpan.FromSeconds(d));

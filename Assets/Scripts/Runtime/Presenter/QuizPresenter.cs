@@ -28,7 +28,7 @@ namespace QuizGame.Runtime.Presenter
         {
             _quizSetting = SettingRegistry.SettingRegistry.Load<QuizSetting>();
             
-            scoreView.SetScoreAnimated(0);
+            scoreView.SetScore(0);
             timerView.gameObject.SetActive(false);
             scoreView.gameObject.SetActive(false);
         }
@@ -47,7 +47,7 @@ namespace QuizGame.Runtime.Presenter
 
         private void StartQuestionSession()
         {
-            SetQuestionRoutine(CurrentQuestion);
+            SetQuestionAsync(CurrentQuestion);
         }
         
         private void EnQuestionSession(QuestionResult result)
@@ -63,10 +63,10 @@ namespace QuizGame.Runtime.Presenter
             SignalBus<QuizSessionEndSignal>.Emit(new QuizSessionEndSignal(_score));
         }
 
-        private async UniTask SetQuestionRoutine(Question question)
+        private async UniTask SetQuestionAsync(Question question)
         {
             quizView.OnAnswerSelect += OnAnswerSelected;
-            await quizView.SetNextQuestionRoutine(question);
+            await quizView.SetNextQuestionAsync(question);
             timerView.StartTimer(_quizSetting.TimePerQuestion, OnTimerExpired);
         }
         
@@ -74,32 +74,32 @@ namespace QuizGame.Runtime.Presenter
         {
             if (answer == CurrentQuestion.Answer)
             {
-                OnCorrectAnswerRoutine(answer);
+                OnCorrectAnswerAsync(answer);
             }
             else
             {
-                OnWrongAnswerRoutine(answer);
+                OnWrongAnswerAsync(answer);
             }
         }
 
-        private async UniTask OnCorrectAnswerRoutine(Answer answer)
+        private async UniTask OnCorrectAnswerAsync(Answer answer)
         {
             EnQuestionSession(QuestionResult.CorrectAnswer);
-            await quizView.AnimateSelectedAnswer(answer);
+            await quizView.AnimateSelectedAnswerAsync(answer);
             quizView.VisualiseCorrectAnswer(answer);
             scoreView.SetScoreAnimated(_score);
-            ContinueOrEndQuizSessionWithDelayRoutine(true);
+            ContinueOrEndQuizSessionWithDelayAsync(true);
         }
 
-        private async UniTask OnWrongAnswerRoutine(Answer answer)
+        private async UniTask OnWrongAnswerAsync(Answer answer)
         {
             EnQuestionSession(QuestionResult.WrongAnswer);
-            await quizView.AnimateSelectedAnswer(answer);
+            await quizView.AnimateSelectedAnswerAsync(answer);
             quizView.VisualiseWrongAnswer(answer);
             quizView.VisualiseCorrectAnswer(CurrentQuestion.Answer);
             scoreView.SetScoreAnimated(_score);
             var shouldContinue = _quizSetting.ShouldContinueToNextQuestionOnWrongAnswer;
-            ContinueOrEndQuizSessionWithDelayRoutine(shouldContinue);
+            ContinueOrEndQuizSessionWithDelayAsync(shouldContinue);
         }
 
         private void OnTimerExpired()
@@ -108,10 +108,10 @@ namespace QuizGame.Runtime.Presenter
             quizView.VisualiseCorrectAnswer(CurrentQuestion.Answer);
             scoreView.SetScoreAnimated(_score);
             var shouldContinue = _quizSetting.ShouldContinueToNextQuestionOnTimerExpired;
-            ContinueOrEndQuizSessionWithDelayRoutine(shouldContinue);
+            ContinueOrEndQuizSessionWithDelayAsync(shouldContinue);
         }
         
-        private async UniTask ContinueOrEndQuizSessionWithDelayRoutine(bool shouldContinue)
+        private async UniTask ContinueOrEndQuizSessionWithDelayAsync(bool shouldContinue)
         {
             await UniTask.Delay(TimeSpan.FromSeconds(_quizSetting.DelayAfterQuestionSessionEnd));
             if (shouldContinue && ++_currentQuestionIndex < quiz.Questions.Length)

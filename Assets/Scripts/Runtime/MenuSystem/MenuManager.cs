@@ -40,6 +40,14 @@ namespace QuizGame.Runtime.MenuSystem
 
             _instance = this;
         }
+        
+        private void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
+        }
 
         public void OpenMenu(Menu menu)
         {
@@ -76,6 +84,12 @@ namespace QuizGame.Runtime.MenuSystem
             }
         }
 
+        private void ExecuteCommand(Command command)
+        {
+            _commandOnExecution = command;
+            _commandOnExecution.Execute();
+        }
+        
         private void OnOpenMenuCommandExecuted(Menu menu)
         {
             _commandOnExecution = null;
@@ -93,20 +107,6 @@ namespace QuizGame.Runtime.MenuSystem
             if (_pendingCommands.Count > 0)
             {
                 ExecuteCommand(_pendingCommands.Dequeue());
-            }
-        }
-
-        private void ExecuteCommand(Command command)
-        {
-            _commandOnExecution = command;
-            _commandOnExecution.Execute();
-        }
-
-        private void OnDestroy()
-        {
-            if (_instance == this)
-            {
-                _instance = null;
             }
         }
 
@@ -131,13 +131,13 @@ namespace QuizGame.Runtime.MenuSystem
 
             public override void Execute()
             {
-                OpenMenuRoutine();
+                OpenMenuAsync();
             }
 
-            private async void OpenMenuRoutine()
+            private async void OpenMenuAsync()
             {
                 _menu.gameObject.SetActive(true);
-                await _menu.EntryAnimationRoutine();
+                await _menu.EntryAnimationAsync();
                 _onCommandExecuted.Invoke(_menu);
             }
         }
@@ -149,12 +149,12 @@ namespace QuizGame.Runtime.MenuSystem
             
             public override void Execute()
             {
-                CloseMenuRoutine();
+                CloseMenuAsync();
             }
 
-            private async void CloseMenuRoutine()
+            private async void CloseMenuAsync()
             {
-                await _menu.OutroAnimationRoutine();
+                await _menu.OutroAnimationAsync();
                 _menu.gameObject.SetActive(false);
                 _onCommandExecuted.Invoke(_menu);
             }

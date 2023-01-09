@@ -37,17 +37,17 @@ namespace QuizGame.Runtime.Presenter
         
         private void OnCloseButtonClicked()
         {
-            HideLeaderboardRoutine();
+            HideLeaderboardAsync();
         }
 
-        private async void HideLeaderboardRoutine()
+        private async void HideLeaderboardAsync()
         {
-            await leaderboardPageView.OutroAnimationRoutine();
+            await leaderboardPageView.OutroAnimationAsync();
             leaderboardPageView.gameObject.SetActive(false);
             _shown = false;
         }
 
-        public async void ShowLeaderboardPopup()
+        public async void ShowLeaderboardPopupAsync()
         {
             if (_shown)
             {
@@ -55,13 +55,13 @@ namespace QuizGame.Runtime.Presenter
             }
             
             _shown = true;
-            await FetchLeaderboard();
+            await FetchLeaderboardAsync();
             leaderboardPageView.gameObject.SetActive(true);
             leaderboardPageView.SetLeaderboardPage(_leaderBoardPages[0]);
-            leaderboardPageView.EntryAnimationRoutine();
+            leaderboardPageView.EntryAnimationAsync();
         }
 
-        private async UniTask FetchLeaderboard()
+        private async UniTask FetchLeaderboardAsync()
         {
             _leaderBoardPages.Clear();
             var pageIndex = 0;

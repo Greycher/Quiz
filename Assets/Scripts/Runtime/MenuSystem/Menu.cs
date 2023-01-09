@@ -31,14 +31,14 @@ namespace QuizGame.Runtime.MenuSystem
             Interactable = false;
         }
 
-        public async UniTask EntryAnimationRoutine()
+        public async UniTask EntryAnimationAsync()
         {
             var d = entryAnimState.Play();
             await UniTask.Delay(TimeSpan.FromSeconds(d));
             Interactable = true;
         }
         
-        public async UniTask OutroAnimationRoutine()
+        public async UniTask OutroAnimationAsync()
         {
             Interactable = false;
             var d = outroAnimState.Play();

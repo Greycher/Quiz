@@ -33,7 +33,7 @@ namespace QuizGame.Runtime
         
         private void OnLeaderboardButtonClicked()
         {
-            leaderboardPresenter.ShowLeaderboardPopup();
+            leaderboardPresenter.ShowLeaderboardPopupAsync();
         }
         
         private void OnQuitButtonClicked()

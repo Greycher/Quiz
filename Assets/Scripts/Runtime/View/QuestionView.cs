@@ -77,7 +77,7 @@ namespace QuizGame.Runtime.View
             choiceDView.ResetAnimation();
         }
 
-        public async UniTask EnterScreen()
+        public async UniTask EnterScreenAsync()
         {
             if (_onScreen)
             {
@@ -91,7 +91,7 @@ namespace QuizGame.Runtime.View
             SetButtonsInteractable(true);
         }
         
-        public async UniTask ExitScreen()
+        public async UniTask ExitScreenAsync()
         {
             if (!_onScreen)
             {
@@ -113,9 +113,9 @@ namespace QuizGame.Runtime.View
             ScreenBlendSetter(outerRightBlendValue);
         }
 
-        public async UniTask AnimateSelectedAnswer(Answer answer)
+        public async UniTask AnimateSelectedAnswerAsync(Answer answer)
         {
-            await GetToChoiceView(answer).AnimateSelectedAnswer();
+            await GetToChoiceView(answer).AnimateSelectedAnswerAsync();
         }
         
         public void VisualiseCorrectAnswer(Answer answer)
