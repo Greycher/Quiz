@@ -73,7 +73,7 @@ namespace QuizGame.Runtime.Presenter
                     throw new Exception("Possible infinite loop!");
                 }
                 
-                using (UnityWebRequest request = UnityWebRequest.Get($"localhost:8080/leaderboard?page={pageIndex++}"))
+                using (UnityWebRequest request = UnityWebRequest.Get($"https://magegamessite.web.app/case1/leaderboard_page_{pageIndex++}.json"))
                 {
                     await request.SendWebRequest();
                     
